@@ -6,6 +6,9 @@ import com.github.ifthen2.matrix.Matrix;
 import com.github.ifthen2.matrix.operation.matrix.MatrixOperation;
 import com.github.ifthen2.matrix.value.MatrixValue;
 
+/**
+ * Defines the scale operation for a Matrix
+ */
 public class MatrixScaleOperation<T extends MatrixValue<T>> implements MatrixOperation<T> {
 
     private final Matrix<T> receiver;

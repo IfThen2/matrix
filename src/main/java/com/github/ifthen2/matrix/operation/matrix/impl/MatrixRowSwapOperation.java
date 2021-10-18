@@ -7,6 +7,9 @@ import com.github.ifthen2.matrix.operation.matrix.MatrixOperation;
 import com.github.ifthen2.matrix.value.MatrixValue;
 import com.google.common.base.Preconditions;
 
+/**
+ * Defines a row swap Operation for a Matrix.
+ */
 public class MatrixRowSwapOperation<T extends MatrixValue<T>> implements MatrixOperation<T> {
 
     private final Matrix<T> receiver;
