@@ -6,18 +6,18 @@ import com.github.ifthen2.matrix.Matrix;
 import com.github.ifthen2.matrix.operation.matrix.MatrixOperation;
 import com.github.ifthen2.matrix.value.MatrixValue;
 
-public class MatrixScaleOperation implements MatrixOperation {
+public class MatrixScaleOperation<T extends MatrixValue<T>> implements MatrixOperation<T> {
 
-    private final Matrix receiver;
-    private final MatrixValue scalar;
+    private final Matrix<T> receiver;
+    private final T scalar;
 
-    public MatrixScaleOperation(Matrix receiver, MatrixValue scalar) {
+    public MatrixScaleOperation(Matrix<T> receiver, T scalar) {
         this.receiver = requireNonNull(receiver, "receiver must not be null");
         this.scalar = scalar;
     }
 
     @Override
-    public Matrix perform() {
+    public Matrix<T> perform() {
         return receiver.scale(scalar);
     }
 }

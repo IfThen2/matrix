@@ -3,50 +3,103 @@ package com.github.ifthen2.matrix;
 import com.github.ifthen2.matrix.element.MatrixElement;
 import com.github.ifthen2.matrix.value.MatrixValue;
 import com.github.ifthen2.matrix.vector.MatrixVector;
-import com.google.common.base.Predicate;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.Set;
 import java.util.function.BiPredicate;
 
-public interface Matrix<T extends MatrixValue> {
+/**
+ * Generic interface for Matrices. Defines basic operations on elements of type {@link MatrixValue}
+ */
+public interface Matrix<T extends MatrixValue<T>> {
 
-
-    Predicate<Object[][]> IS_RECTANGULAR = e -> Arrays.stream(e)
-        .allMatch(arr -> arr.length == e.length);
-    BiPredicate<Matrix<?>, Matrix<?>> ROW_DIMENSIONS_MATCH =
-        (m1, m2) -> m1.getRowDim() == m2.getRowDim();
-    BiPredicate<Matrix<?>, Matrix<?>> COL_DIMENSIONS_MATCH =
-        (m1, m2) -> m1.getColDim() == m2.getColDim();
     BiPredicate<MatrixElement<?>, Integer> ELEMENT_IN_ROW = (e, i) -> e.getRow() == i;
-    BiPredicate<Matrix, Matrix> COMPOSITION_DIMENSIONS_MATCH =
-        (m1, m2) -> m1.getColDim() == m2.getRowDim();
 
+    /**
+     * Returns element at specified row/col indices.
+     *
+     * @param rowIndex - row of requested element
+     * @param columnIndex - column of requested element
+     * @return the requested element
+     */
     MatrixElement<T> getElement(int rowIndex, int columnIndex);
 
-    Collection<MatrixElement<T>> getElements();
+    Set<MatrixElement<T>> getElements();
 
     int getRowDim();
 
     int getColDim();
 
-    MatrixElement<T>[][] getRectangularArray();
-
+    /**
+     * Add another Matrix to this one, and return a new Matrix as the result.
+     *
+     * @param otherMatrix - Matrix to be added to this one
+     * @return new summed Matrix
+     */
     Matrix<T> add(Matrix<T> otherMatrix);
 
+    /**
+     * Scale this matrix by a simple scalar value, and return a new Matrix as the result.
+     *
+     * @param scalar - value to scale each element by
+     * @return new scaled Matrix
+     */
     Matrix<T> scale(T scalar);
 
-    Matrix<T> composeMatrix(Matrix<T> transform);
+    /**
+     * Compose this matrix with another one, and return a new Matrix as the result.
+     *
+     * @param otherMatrix - Matrix to compose with this one.
+     * @return new composed Matrix
+     */
+    Matrix<T> composeMatrix(Matrix<T> otherMatrix);
 
+    /**
+     * Transpose the rows and columns of this Matrix, and return a new Matrix as the result.
+     *
+     * @return new transposed Matrix
+     */
     Matrix<T> transpose();
 
+    /**
+     * Get Row Vector representation of element sub-set.
+     *
+     * @param rowIndex - row number requested
+     * @return MatrixVector row representation
+     */
     MatrixVector<T> getRowVector(int rowIndex);
 
+    /**
+     * Get Column Vector representation of element sub-set.
+     *
+     * @param columnIndex - column number requested
+     * @return MatrixVector column representation
+     */
     MatrixVector<T> getColumnVector(int columnIndex);
 
+    /**
+     * Add one row of this Matrix to another, and return the result as a new Matrix.
+     *
+     * @param firstRowIndex - first row number
+     * @param secondRowIndex - second row number
+     * @return new resultant Matrix
+     */
     Matrix<T> addRowToRow(int firstRowIndex, int secondRowIndex);
 
+    /**
+     * Scale one row of this Matrix by a scalar value, and return the result as a new Matrix.
+     *
+     * @param rowIndex - row number to scale
+     * @param scalar - value to scale by
+     * @return new resultant Matrix
+     */
     Matrix<T> scaleRow(int rowIndex, T scalar);
 
+    /**
+     * Swap one row of this Matrix with another, and return the result as a new Matrix.
+     *
+     * @param firstRowIndex - first row number
+     * @param secondRowIndex - second row number
+     * @return new resultant Matrix
+     */
     Matrix<T> swapRow(int firstRowIndex, int secondRowIndex);
 
 }

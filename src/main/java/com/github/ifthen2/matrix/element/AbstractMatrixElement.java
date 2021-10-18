@@ -3,7 +3,11 @@ package com.github.ifthen2.matrix.element;
 import com.github.ifthen2.matrix.value.MatrixValue;
 import com.google.common.base.Preconditions;
 
-public abstract class AbstractMatrixElement<T extends MatrixValue> implements MatrixElement<T> {
+/**
+ * Skeletal implementation of the MatrixElement interface to minimize the effort required to
+ * implement.
+ */
+public abstract class AbstractMatrixElement<T extends MatrixValue<T>> implements MatrixElement<T> {
 
     final int row;
     final int column;

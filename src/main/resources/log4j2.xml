@@ -6,7 +6,6 @@
     </Console>
   </Appenders>
   <Loggers>
-    <!-- avoid duplicated logs with additivity=false -->
     <Logger name="com.github.ifthen2.matrix" level="info" additivity="false">
       <AppenderRef ref="LogToConsole"/>
     </Logger>

@@ -2,16 +2,26 @@ package com.github.ifthen2.matrix.transform;
 
 import com.github.ifthen2.matrix.Matrix;
 import com.github.ifthen2.matrix.operation.matrix.MatrixOperation;
+import com.github.ifthen2.matrix.value.MatrixValue;
+import java.util.Objects;
 
-public class MatrixTransformer {
+/**
+ * Optional Invoker for Matrix Operations
+ */
+public class MatrixTransformer<T extends MatrixValue<T>> {
 
-    private final MatrixOperation operation;
+    private final MatrixOperation<T> operation;
 
-    public MatrixTransformer(MatrixOperation operation) {
-        this.operation = operation;
+    public MatrixTransformer(MatrixOperation<T> operation) {
+        this.operation = Objects.requireNonNull(operation, "operation must not be null");
     }
 
-    public Matrix performOperation() {
+    /**
+     * Performs the requested Matrix Operation
+     *
+     * @return new resultant Matrix
+     */
+    public Matrix<T> performOperation() {
         return operation.perform();
     }
 }

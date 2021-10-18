@@ -4,19 +4,20 @@ import static java.util.Objects.requireNonNull;
 
 import com.github.ifthen2.matrix.Matrix;
 import com.github.ifthen2.matrix.operation.matrix.MatrixOperation;
+import com.github.ifthen2.matrix.value.MatrixValue;
 
-public class MatrixAddOperation implements MatrixOperation {
+public class MatrixAddOperation<T extends MatrixValue<T>> implements MatrixOperation<T> {
 
-    private final Matrix receiver;
-    private final Matrix operand;
+    private final Matrix<T> receiver;
+    private final Matrix<T> operand;
 
-    public MatrixAddOperation(Matrix receiver, Matrix operand) {
+    public MatrixAddOperation(Matrix<T> receiver, Matrix<T> operand) {
         this.receiver = requireNonNull(receiver, "receiver must not be null");
         this.operand = requireNonNull(operand, "operand must not be null");
     }
 
     @Override
-    public Matrix perform() {
+    public Matrix<T> perform() {
         return receiver.add(operand);
     }
 }
