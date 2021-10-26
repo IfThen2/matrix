@@ -21,6 +21,6 @@ public class MatrixAddOperation<T extends MatrixValue<T>> implements MatrixOpera
 
     @Override
     public Matrix<T> perform() {
-        return receiver.add(operand);
+        return receiver.addMatrix(operand);
     }
 }

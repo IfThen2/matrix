@@ -28,6 +28,16 @@ public class MatrixNumberValue implements MatrixValue<MatrixNumberValue> {
     }
 
     @Override
+    public MatrixNumberValue additiveIdentity() {
+        return new MatrixNumberValue(0);
+    }
+
+    @Override
+    public MatrixNumberValue multiplicativeIdentity() {
+        return new MatrixNumberValue(0);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -46,8 +56,6 @@ public class MatrixNumberValue implements MatrixValue<MatrixNumberValue> {
 
     @Override
     public String toString() {
-        return "MatrixNumberValue{" +
-            "value=" + value +
-            '}';
+        return value + "";
     }
 }

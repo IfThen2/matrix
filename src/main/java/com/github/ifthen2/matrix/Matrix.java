@@ -9,23 +9,34 @@ import java.util.function.BiPredicate;
 /**
  * Generic interface for Matrices. Defines basic operations on elements of type {@link MatrixValue}
  */
-public interface Matrix<T extends MatrixValue<T>> {
+public interface Matrix<T extends MatrixValue<T>> extends MatrixValue<Matrix<T>> {
 
     BiPredicate<MatrixElement<?>, Integer> ELEMENT_IN_ROW = (e, i) -> e.getRow() == i;
 
     /**
-     * Returns element at specified row/col indices.
+     * Get the element at specified row/col indices.
      *
      * @param rowIndex - row of requested element
      * @param columnIndex - column of requested element
-     * @return the requested element
+     * @return the requested element, or null if not found
      */
     MatrixElement<T> getElement(int rowIndex, int columnIndex);
 
+    /**
+     * Get all elements from this Matrix
+     *
+     * @return all elements
+     */
     Set<MatrixElement<T>> getElements();
 
+    /**
+     * Get the number of rows
+     */
     int getRowDim();
 
+    /**
+     * Get the number of columns
+     */
     int getColDim();
 
     /**
@@ -34,7 +45,7 @@ public interface Matrix<T extends MatrixValue<T>> {
      * @param otherMatrix - Matrix to be added to this one
      * @return new summed Matrix
      */
-    Matrix<T> add(Matrix<T> otherMatrix);
+    Matrix<T> addMatrix(Matrix<T> otherMatrix);
 
     /**
      * Scale this matrix by a simple scalar value, and return a new Matrix as the result.
@@ -42,7 +53,7 @@ public interface Matrix<T extends MatrixValue<T>> {
      * @param scalar - value to scale each element by
      * @return new scaled Matrix
      */
-    Matrix<T> scale(T scalar);
+    Matrix<T> scaleMatrix(T scalar);
 
     /**
      * Compose this matrix with another one, and return a new Matrix as the result.
@@ -102,4 +113,13 @@ public interface Matrix<T extends MatrixValue<T>> {
      */
     Matrix<T> swapRow(int firstRowIndex, int secondRowIndex);
 
+    @Override
+    default Matrix<T> add(Matrix<T> e2) {
+        return this.addMatrix(e2);
+    }
+
+    @Override
+    default Matrix<T> multiply(Matrix<T> e2) {
+        return this.composeMatrix(e2);
+    }
 }

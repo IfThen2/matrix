@@ -21,6 +21,6 @@ public class MatrixScaleOperation<T extends MatrixValue<T>> implements MatrixOpe
 
     @Override
     public Matrix<T> perform() {
-        return receiver.scale(scalar);
+        return receiver.scaleMatrix(scalar);
     }
 }

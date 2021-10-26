@@ -53,12 +53,11 @@ public class SimpleMatrix<T extends MatrixValue<T>> implements Matrix<T> {
         Preconditions
             .checkPositionIndex(colIndex - 1, this.getColDim() - 1, "colIndex is out of bounds.");
 
-        Optional<MatrixElement<T>> element = elementTable
-            .stream()
+        Optional<MatrixElement<T>> element = elementTable.stream()
             .filter(e -> e.getColumn() == colIndex && e.getRow() == rowIndex)
             .findAny();
 
-        return element.orElseThrow(() -> new IllegalArgumentException("invalid element requested"));
+        return element.orElse(null);
     }
 
     @Override
@@ -81,24 +80,23 @@ public class SimpleMatrix<T extends MatrixValue<T>> implements Matrix<T> {
      * @throws IllegalArgumentException if both Matrices dimensions don't match
      */
     @Override
-    public Matrix<T> add(Matrix<T> m2) {
+    public Matrix<T> addMatrix(Matrix<T> otherMatrix) {
 
-        Preconditions.checkNotNull(m2, "m2 must not be null");
+        Preconditions.checkNotNull(otherMatrix, "m2 must not be null");
         Preconditions
             .checkArgument(
-                (this.rowDim == m2.getRowDim()) && (this.colDim == m2.getColDim()),
-                "addition is not defined for matrices of different dimensions. this={}x{} m2={}x{}",
+                (this.rowDim == otherMatrix.getRowDim()) && (this.colDim == otherMatrix
+                    .getColDim()),
+                "addition is not defined for matrices of different dimensions. this={}x{} otherMatrix={}x{}",
                 this.rowDim,
                 this.colDim,
-                m2.getRowDim(),
-                m2.getColDim());
-
-        LOGGER.info("Adding M2 to Matrix");
+                otherMatrix.getRowDim(),
+                otherMatrix.getColDim());
 
         Stream<MatrixElement<T>> m1Stream = elementTable.stream()
             .sorted(MatrixElement.ROW_COL_ORDER);
 
-        Stream<MatrixElement<T>> m2Stream = m2.getElements().stream()
+        Stream<MatrixElement<T>> m2Stream = otherMatrix.getElements().stream()
             .sorted(MatrixElement.ROW_COL_ORDER);
 
         Set<MatrixElement<T>> newElements = Streams
@@ -109,11 +107,11 @@ public class SimpleMatrix<T extends MatrixValue<T>> implements Matrix<T> {
     }
 
     @Override
-    public Matrix<T> scale(T scalar) {
+    public Matrix<T> scaleMatrix(T scalar) {
         LOGGER.info("Scaling Matrix by {}", scalar);
 
-        Stream<MatrixElement<T>> elementStream = elementTable.stream().map(
-            e -> new SimpleMatrixElement<>(e.getColumn(), e.getRow(),
+        Stream<MatrixElement<T>> elementStream = elementTable.stream()
+            .map(e -> new SimpleMatrixElement<>(e.getColumn(), e.getRow(),
                 e.getValue().multiply(scalar)));
 
         Set<MatrixElement<T>> newElements = elementStream
@@ -127,21 +125,21 @@ public class SimpleMatrix<T extends MatrixValue<T>> implements Matrix<T> {
      * @throws IllegalArgumentException if Matrices dimensions aren't compatible for composition
      */
     @Override
-    public Matrix<T> composeMatrix(Matrix<T> m2) {
+    public Matrix<T> composeMatrix(Matrix<T> otherMatrix) {
 
-        Preconditions.checkNotNull(m2, "m2 must not be null");
-        Preconditions.checkArgument(this.rowDim == m2.getColDim(),
+        Preconditions.checkNotNull(otherMatrix, "m2 must not be null");
+        Preconditions.checkArgument(this.rowDim == otherMatrix.getColDim(),
             "composition is not defined when #A-rows != #B-columns. this={}{}, other={}{}",
             this.rowDim,
             this.colDim,
-            m2.getRowDim(),
-            m2.getColDim());
+            otherMatrix.getRowDim(),
+            otherMatrix.getColDim());
 
         Set<MatrixVector<T>> rowVectors = IntStream.rangeClosed(1, this.rowDim)
             .mapToObj(this::getRowVector).collect(toSet());
 
-        Set<MatrixVector<T>> colVectors = IntStream.rangeClosed(1, m2.getColDim())
-            .mapToObj(m2::getColumnVector).collect(toSet());
+        Set<MatrixVector<T>> colVectors = IntStream.rangeClosed(1, otherMatrix.getColDim())
+            .mapToObj(otherMatrix::getColumnVector).collect(toSet());
 
         Set<MatrixElement<T>> resultElements = new HashSet<>();
 
@@ -157,7 +155,6 @@ public class SimpleMatrix<T extends MatrixValue<T>> implements Matrix<T> {
 
     @Override
     public Matrix<T> transpose() {
-        LOGGER.info("Transposing...");
 
         Set<MatrixElement<T>> newElements = elementTable.stream()
             .map(e -> new SimpleMatrixElement<>(e.getColumn(), e.getRow(), e.getValue()))
@@ -183,14 +180,14 @@ public class SimpleMatrix<T extends MatrixValue<T>> implements Matrix<T> {
      * @throws IndexOutOfBoundsException if index exceeds column dimension
      */
     @Override
-    public MatrixVector<T> getColumnVector(int colIndex) {
+    public MatrixVector<T> getColumnVector(int columnIndex) {
         Preconditions
-            .checkPositionIndex(colIndex - 1, this.colDim - 1,
+            .checkPositionIndex(columnIndex - 1, this.colDim - 1,
                 "columnIndex is out of bounds.");
 
-        Set<MatrixElement<T>> elements = getColumnSet(colIndex);
+        Set<MatrixElement<T>> elements = getColumnSet(columnIndex);
 
-        return new SimpleMatrixVector<>(elements, colIndex, VectorOrientation.COLUMN);
+        return new SimpleMatrixVector<>(elements, columnIndex, VectorOrientation.COLUMN);
     }
 
     /**
@@ -251,18 +248,13 @@ public class SimpleMatrix<T extends MatrixValue<T>> implements Matrix<T> {
             .checkPositionIndex(secondRowIndex - 1, this.colDim - 1,
                 "secondRowIndex is out of bounds.");
 
-        LOGGER.info("Swapping Row {} and Row {}", firstRowIndex, secondRowIndex);
-
         Stream<MatrixElement<T>> elementStream = elementTable.stream()
             .map((e -> {
                 if (ELEMENT_IN_ROW.test(e, firstRowIndex)) {
-                    System.out.println("found 1");
                     return new SimpleMatrixElement<>(secondRowIndex, e.getColumn(), e.getValue());
                 } else if (ELEMENT_IN_ROW.test(e, secondRowIndex)) {
-                    System.out.println("found 2");
                     return new SimpleMatrixElement<>(firstRowIndex, e.getColumn(), e.getValue());
                 } else {
-                    System.out.println("found 3");
                     return e;
                 }
             }));
@@ -279,7 +271,9 @@ public class SimpleMatrix<T extends MatrixValue<T>> implements Matrix<T> {
      * @return set of elements
      */
     private Set<MatrixElement<T>> getRowSet(int rowIndex) {
-        return elementTable.stream().filter(e -> e.getRow() == rowIndex).collect(toSet());
+        return elementTable.stream()
+            .filter(e -> e.getRow() == rowIndex)
+            .collect(toSet());
     }
 
     /**
@@ -289,13 +283,35 @@ public class SimpleMatrix<T extends MatrixValue<T>> implements Matrix<T> {
      * @return set of elements
      */
     private Set<MatrixElement<T>> getColumnSet(int colIndex) {
-        return elementTable.stream().filter(e -> e.getColumn() == colIndex).collect(toSet());
+        return elementTable.stream()
+            .filter(e -> e.getColumn() == colIndex)
+            .collect(toSet());
     }
 
     @Override
     public String toString() {
-        return "SimpleMatrix{" +
-            "elementTable=" + elementTable +
-            '}';
+
+        StringBuilder sb = new StringBuilder();
+
+        elementTable.stream()
+            .sorted(MatrixElement.ROW_COL_ORDER)
+            .collect(Collectors.groupingBy(MatrixElement::getRow)).values().forEach(
+            row -> {
+                sb.append(System.lineSeparator());
+                row.forEach(
+                    element -> sb.append(String.format("|%8s |", element.getValue().toString())));
+            });
+
+        return sb.toString();
+    }
+
+    @Override
+    public Matrix<T> additiveIdentity() {
+        return null;
+    }
+
+    @Override
+    public Matrix<T> multiplicativeIdentity() {
+        return null;
     }
 }
