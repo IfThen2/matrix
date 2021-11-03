@@ -20,8 +20,4 @@ public interface MatrixValue<T> {
      * @return new resultant MatrixValue
      */
     T multiply(T e2);
-
-    T additiveIdentity();
-
-    T multiplicativeIdentity();
 }

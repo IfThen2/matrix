@@ -4,12 +4,15 @@ package com.github.ifthen2.matrix.vector;
 import com.github.ifthen2.matrix.element.MatrixElement;
 import com.github.ifthen2.matrix.value.MatrixValue;
 import com.github.ifthen2.matrix.vector.SimpleMatrixVector.VectorOrientation;
+import java.util.Comparator;
 import java.util.Set;
 
 /**
  * Simple generic interface to represent Matrix Vectors.. not really sure about this yet.
  */
 public interface MatrixVector<T extends MatrixValue<T>> {
+
+    Comparator<MatrixVector<?>> INDEX_ORDER = Comparator.comparing(MatrixVector::getIndex);
 
     /**
      * Get all elements

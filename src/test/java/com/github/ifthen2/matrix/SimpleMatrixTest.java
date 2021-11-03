@@ -3,18 +3,13 @@ package com.github.ifthen2.matrix;
 
 import com.github.ifthen2.matrix.element.MatrixElement;
 import com.github.ifthen2.matrix.element.SimpleMatrixElement;
-import com.github.ifthen2.matrix.operation.matrix.MatrixOperation;
-import com.github.ifthen2.matrix.operation.matrix.impl.MatrixAddOperation;
-import com.github.ifthen2.matrix.operation.matrix.impl.MatrixComposeOperation;
-import com.github.ifthen2.matrix.operation.matrix.impl.MatrixRowSwapOperation;
-import com.github.ifthen2.matrix.operation.matrix.impl.MatrixScaleOperation;
-import com.github.ifthen2.matrix.transform.MatrixTransformer;
 import com.github.ifthen2.matrix.value.MatrixBooleanValue;
 import com.github.ifthen2.matrix.value.MatrixNumberValue;
 import com.github.ifthen2.matrix.value.MatrixValue;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -28,148 +23,205 @@ public class SimpleMatrixTest {
 
     static final Logger LOGGER = LoggerFactory.getLogger(SimpleMatrixTest.class);
 
-    static final double DOUBLE_DELTA = 1e-15;
-
-    static final int NUM_ROWS = 2;
-    static final int NUM_COLS = 2;
-
     @ParameterizedTest
-    @MethodSource("TestMatrixScalarOperations")
-    public <T extends MatrixValue<T>> void testMatrixScale(Matrix<T> matrix, T scalar) {
-        MatrixOperation<T> scaleOperation = new MatrixScaleOperation<>(matrix,
-            scalar);
-        MatrixTransformer<T> transformer = new MatrixTransformer<>(scaleOperation);
-        Matrix<T> scaledMatrix = transformer.performOperation();
+    @MethodSource("TestMatrixAddition")
+    <T extends MatrixValue<T>> void testMatrixAddition(Matrix<T> subject, Matrix<T> operand,
+        Matrix<T> expected) {
 
-        LOGGER.info("{}", matrix);
-        LOGGER.info("{}", scaledMatrix);
+        Matrix<T> summedMatrix = subject.addMatrix(operand);
 
-        //TODO assertions
+        LOGGER.info("subject -> {}", subject);
+        LOGGER.info("operand -> {}", operand);
+        LOGGER.info("sum     -> {}", summedMatrix);
+
+        Assertions.assertEquals(expected, summedMatrix);
     }
 
     @ParameterizedTest
-    @MethodSource("TestMatrixMatrixOperations")
-    public <T extends MatrixValue<T>> void testMatrixAddition(Matrix<T> matrix, Matrix<T> matrix2) {
-        MatrixOperation<T> addOperation = new MatrixAddOperation<>(matrix, matrix2);
-        MatrixTransformer<T> transformer = new MatrixTransformer<>(addOperation);
-        Matrix<T> summedMatrix = transformer.performOperation();
+    @MethodSource("TestMatrixMultiplication")
+    public <T extends MatrixValue<T>> void testMatrixComposeOperation(Matrix<T> subject,
+        Matrix<T> operand, Matrix<T> expected) {
 
-        LOGGER.info("{}", matrix);
-        LOGGER.info("{}", summedMatrix);
+        Matrix<T> composedMatrix = subject.multiply(operand);
 
-        //TODO assertions
-    }
-
-    @ParameterizedTest
-    @MethodSource("TestMatrixRowOperations")
-    public <T extends MatrixValue<T>> void testMatrixRowSwapOperation(Matrix<T> matrix, int row1,
-        int row2) {
-        MatrixOperation<T> rowSwapOperation = new MatrixRowSwapOperation<>(matrix,
-            row1, row2);
-        MatrixTransformer<T> transformer = new MatrixTransformer<>(
-            rowSwapOperation);
-        Matrix<T> swappedMatrix = transformer.performOperation();
-
-        LOGGER.info("{}", matrix);
-        LOGGER.info("{}", swappedMatrix);
-
-        //TODO assertions
-    }
-
-    @ParameterizedTest
-    @MethodSource("TestMatrixMatrixOperations")
-    public <T extends MatrixValue<T>> void testMatrixComposeOperation(Matrix<T> matrix,
-        Matrix<T> matrix2) {
-        MatrixOperation<T> composeOperation = new MatrixComposeOperation<>(matrix, matrix2);
-        MatrixTransformer<T> transformer = new MatrixTransformer<>(
-            composeOperation);
-        Matrix<T> composedMatrix = transformer.performOperation();
-
-        LOGGER.info("{}", matrix);
-        LOGGER.info("{}", matrix2);
+        LOGGER.info("{}", subject);
+        LOGGER.info("{}", operand);
         LOGGER.info("{}", composedMatrix);
 
-        //TODO assertions
+        Assertions.assertEquals(expected, composedMatrix);
     }
-//
+
 
     /**
-     * Provides a test Matrix whose elements numbers.
+     * JUnit 5 Method Argument Factory for tests of Matrix Addition.
      */
-    private static Matrix<MatrixNumberValue> getTestNumberMatrix() {
+    private static Stream<Arguments> TestMatrixAddition() {
+        return Stream.of(
+            Arguments.of(getNumericSubject(), getNumericOperand(),
+                getNumericAdditionResult()),
+            Arguments.of(getBooleanSubject(), getBooleanOperand(),
+                getBooleanAdditionResult()),
+            Arguments.of(getMatrixSubject(), getMatrixOperand(), getMatrixAdditionResult())
+        );
+    }
+
+    /**
+     * JUnit 5 Method Argument Factory for tests of Matrix Multiplication.
+     */
+    private static Stream<Arguments> TestMatrixMultiplication() {
+        return Stream.of(
+            Arguments.of(getNumericSubject(), getNumericOperand(),
+                getNumericMultiplicationResult()),
+            Arguments.of(getBooleanSubject(), getBooleanOperand(),
+                getBooleanMultiplicationResult()),
+            Arguments.of(getMatrixSubject(), getMatrixOperand(), getMatrixMultiplicationResult())
+        );
+    }
+
+    private static Matrix<MatrixNumberValue> getNumericSubject() {
 
         Set<MatrixElement<MatrixNumberValue>> set = new HashSet<>();
+        Set<MatrixElement<Matrix<Matrix<Matrix<Matrix<MatrixNumberValue>>>>>> inceptionSet = new HashSet<>();
+        Matrix<Matrix<Matrix<Matrix<Matrix<MatrixNumberValue>>>>> inceptionMatrix = new SimpleMatrix<>(
+            inceptionSet);
 
-        for (int x = 1; x <= NUM_ROWS; x++) {
-            for (int y = 1; y <= NUM_COLS; y++) {
-                set.add(new SimpleMatrixElement<>(x, y, new MatrixNumberValue(x + 1.0 * y + 1.0)));
-            }
-        }
+        set.add(new SimpleMatrixElement<>(1, 1, new MatrixNumberValue(1.0d)));
+        set.add(new SimpleMatrixElement<>(1, 2, new MatrixNumberValue(2.0d)));
+        set.add(new SimpleMatrixElement<>(2, 1, new MatrixNumberValue(3.0d)));
+        set.add(new SimpleMatrixElement<>(2, 2, new MatrixNumberValue(4.0d)));
 
         return new SimpleMatrix<>(set);
     }
 
-    /**
-     * Provides a test Matrix whose elements are boolean values;
-     */
-    private static Matrix<MatrixBooleanValue> getTestBooleanMatrix() {
+    private static Matrix<MatrixBooleanValue> getBooleanSubject() {
+
         Set<MatrixElement<MatrixBooleanValue>> set = new HashSet<>();
 
-        for (int x = 1; x <= NUM_ROWS; x++) {
-            for (int y = 1; y <= NUM_COLS; y++) {
-                set.add(new SimpleMatrixElement<>(x, y,
-                    new MatrixBooleanValue(x % 2 == 0)));
-            }
-        }
+        set.add(new SimpleMatrixElement<>(1, 1, new MatrixBooleanValue(true)));
+        set.add(new SimpleMatrixElement<>(1, 2, new MatrixBooleanValue(false)));
+        set.add(new SimpleMatrixElement<>(2, 1, new MatrixBooleanValue(false)));
+        set.add(new SimpleMatrixElement<>(2, 2, new MatrixBooleanValue(true)));
 
         return new SimpleMatrix<>(set);
     }
 
-    /**
-     * Provides a test Matrix whose elements are Matrices whose elements are numbers.
-     */
-    private static Matrix<Matrix<MatrixNumberValue>> getTestNumberMatrixMatrix() {
+    private static Matrix<Matrix<MatrixNumberValue>> getMatrixSubject() {
 
         Set<MatrixElement<Matrix<MatrixNumberValue>>> set = new HashSet<>();
 
-        for (int x = 1; x <= NUM_ROWS; x++) {
-            for (int y = 1; y <= NUM_COLS; y++) {
-                set.add(new SimpleMatrixElement<>(x, y,
-                    getTestNumberMatrix()));
-            }
-        }
+        set.add(new SimpleMatrixElement<>(1, 1, getNumericSubject()));
+        set.add(new SimpleMatrixElement<>(1, 2, getNumericSubject()));
+        set.add(new SimpleMatrixElement<>(2, 1, getNumericSubject()));
+        set.add(new SimpleMatrixElement<>(2, 2, getNumericSubject()));
 
         return new SimpleMatrix<>(set);
     }
 
-    /**
-     * JUnit 5 Method Argument Factory for tests of Matrix on Matrix operations.
-     */
-    private static Stream<Arguments> TestMatrixMatrixOperations() {
-        return Stream.of(
-            Arguments.of(getTestNumberMatrix(), getTestNumberMatrix()),
-            Arguments.of(getTestBooleanMatrix(), getTestBooleanMatrix()),
-            Arguments.of(getTestNumberMatrixMatrix(), getTestNumberMatrixMatrix())
-        );
+    private static Matrix<MatrixNumberValue> getNumericOperand() {
+
+        Set<MatrixElement<MatrixNumberValue>> set = new HashSet<>();
+
+        set.add(new SimpleMatrixElement<>(1, 1, new MatrixNumberValue(5.0d)));
+        set.add(new SimpleMatrixElement<>(1, 2, new MatrixNumberValue(6.0d)));
+        set.add(new SimpleMatrixElement<>(2, 1, new MatrixNumberValue(7.0d)));
+        set.add(new SimpleMatrixElement<>(2, 2, new MatrixNumberValue(8.0d)));
+
+        return new SimpleMatrix<>(set);
     }
 
-    /**
-     * JUnit 5 Method Argument Factory for tests of Matrix Row operations.
-     */
-    private static Stream<Arguments> TestMatrixRowOperations() {
-        return Stream.of(
-            Arguments.of(getTestNumberMatrix(), 1, 2),
-            Arguments.of(getTestBooleanMatrix(), 1, 2)
-        );
+    private static Matrix<MatrixBooleanValue> getBooleanOperand() {
+
+        Set<MatrixElement<MatrixBooleanValue>> set = new HashSet<>();
+
+        set.add(new SimpleMatrixElement<>(1, 1, new MatrixBooleanValue(false)));
+        set.add(new SimpleMatrixElement<>(1, 2, new MatrixBooleanValue(true)));
+        set.add(new SimpleMatrixElement<>(2, 1, new MatrixBooleanValue(false)));
+        set.add(new SimpleMatrixElement<>(2, 2, new MatrixBooleanValue(false)));
+
+        return new SimpleMatrix<>(set);
     }
 
-    /**
-     * JUnit 5 Method Argument Factory for tests of Matrix scaling operations.
-     */
-    private static Stream<Arguments> TestMatrixScalarOperations() {
-        return Stream.of(
-            Arguments.of(getTestNumberMatrix(), new MatrixNumberValue(2.0)),
-            Arguments.of(getTestBooleanMatrix(), new MatrixBooleanValue(true))
-        );
+    private static Matrix<Matrix<MatrixNumberValue>> getMatrixOperand() {
+
+        Set<MatrixElement<Matrix<MatrixNumberValue>>> set = new HashSet<>();
+
+        set.add(new SimpleMatrixElement<>(1, 1, getNumericOperand()));
+        set.add(new SimpleMatrixElement<>(1, 2, getNumericOperand()));
+        set.add(new SimpleMatrixElement<>(2, 1, getNumericOperand()));
+        set.add(new SimpleMatrixElement<>(2, 2, getNumericOperand()));
+
+        return new SimpleMatrix<>(set);
+    }
+
+    private static Matrix<MatrixNumberValue> getNumericAdditionResult() {
+
+        Set<MatrixElement<MatrixNumberValue>> set = new HashSet<>();
+
+        set.add(new SimpleMatrixElement<>(1, 1, new MatrixNumberValue(6.0d)));
+        set.add(new SimpleMatrixElement<>(1, 2, new MatrixNumberValue(8.0d)));
+        set.add(new SimpleMatrixElement<>(2, 1, new MatrixNumberValue(10.0d)));
+        set.add(new SimpleMatrixElement<>(2, 2, new MatrixNumberValue(12.0d)));
+
+        return new SimpleMatrix<>(set);
+    }
+
+    private static Matrix<MatrixBooleanValue> getBooleanAdditionResult() {
+
+        Set<MatrixElement<MatrixBooleanValue>> set = new HashSet<>();
+
+        set.add(new SimpleMatrixElement<>(1, 1, new MatrixBooleanValue(true)));
+        set.add(new SimpleMatrixElement<>(1, 2, new MatrixBooleanValue(true)));
+        set.add(new SimpleMatrixElement<>(2, 1, new MatrixBooleanValue(false)));
+        set.add(new SimpleMatrixElement<>(2, 2, new MatrixBooleanValue(true)));
+
+        return new SimpleMatrix<>(set);
+    }
+
+    private static Matrix<Matrix<MatrixNumberValue>> getMatrixAdditionResult() {
+
+        Set<MatrixElement<Matrix<MatrixNumberValue>>> set = new HashSet<>();
+
+        set.add(new SimpleMatrixElement<>(1, 1, getNumericAdditionResult()));
+        set.add(new SimpleMatrixElement<>(1, 2, getNumericAdditionResult()));
+        set.add(new SimpleMatrixElement<>(2, 1, getNumericAdditionResult()));
+        set.add(new SimpleMatrixElement<>(2, 2, getNumericAdditionResult()));
+
+        return new SimpleMatrix<>(set);
+    }
+
+    private static Matrix<MatrixNumberValue> getNumericMultiplicationResult() {
+
+        Set<MatrixElement<MatrixNumberValue>> set = new HashSet<>();
+
+        set.add(new SimpleMatrixElement<>(1, 1, new MatrixNumberValue(19.0d)));
+        set.add(new SimpleMatrixElement<>(1, 2, new MatrixNumberValue(22.0d)));
+        set.add(new SimpleMatrixElement<>(2, 1, new MatrixNumberValue(43.0d)));
+        set.add(new SimpleMatrixElement<>(2, 2, new MatrixNumberValue(50.0d)));
+
+        return new SimpleMatrix<>(set);
+    }
+
+    private static Matrix<MatrixBooleanValue> getBooleanMultiplicationResult() {
+
+        Set<MatrixElement<MatrixBooleanValue>> set = new HashSet<>();
+
+        set.add(new SimpleMatrixElement<>(1, 1, new MatrixBooleanValue(false)));
+        set.add(new SimpleMatrixElement<>(1, 2, new MatrixBooleanValue(true)));
+        set.add(new SimpleMatrixElement<>(2, 1, new MatrixBooleanValue(false)));
+        set.add(new SimpleMatrixElement<>(2, 2, new MatrixBooleanValue(false)));
+
+        return new SimpleMatrix<>(set);
+    }
+
+    private static Matrix<Matrix<MatrixNumberValue>> getMatrixMultiplicationResult() {
+
+        Set<MatrixElement<Matrix<MatrixNumberValue>>> set = new HashSet<>();
+
+        set.add(new SimpleMatrixElement<>(1, 2, getNumericMultiplicationResult()));
+        set.add(new SimpleMatrixElement<>(1, 2, getNumericMultiplicationResult()));
+        set.add(new SimpleMatrixElement<>(2, 1, getNumericMultiplicationResult()));
+        set.add(new SimpleMatrixElement<>(2, 2, getNumericMultiplicationResult()));
+
+        return new SimpleMatrix<>(set);
     }
 }

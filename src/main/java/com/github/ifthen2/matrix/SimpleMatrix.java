@@ -8,6 +8,7 @@ import com.github.ifthen2.matrix.value.MatrixValue;
 import com.github.ifthen2.matrix.vector.MatrixVector;
 import com.github.ifthen2.matrix.vector.SimpleMatrixVector;
 import com.github.ifthen2.matrix.vector.SimpleMatrixVector.VectorOrientation;
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Streams;
 import java.util.HashSet;
@@ -194,7 +195,7 @@ public class SimpleMatrix<T extends MatrixValue<T>> implements Matrix<T> {
      * @throws IndexOutOfBoundsException if either index exceeds row dimension
      */
     @Override
-    public Matrix<T> addRowToRow(int firstRowIndex, int secondRowIndex) {
+    public Matrix<T> addRowToRow(int firstRowIndex, int secondRowIndex, T scalar) {
 
         Preconditions
             .checkPositionIndex(firstRowIndex - 1, this.rowDim - 1,
@@ -207,7 +208,7 @@ public class SimpleMatrix<T extends MatrixValue<T>> implements Matrix<T> {
 
         Stream<MatrixElement<T>> elementStream = elementTable.stream()
             .map(((MatrixElement<T> e) -> ELEMENT_IN_ROW.test(e, firstRowIndex)
-                ? e.add(this.getElement(secondRowIndex, e.getColumn()))
+                ? e.add(this.getElement(secondRowIndex, e.getColumn()).multiply(scalar))
                 : e));
 
         Set<MatrixElement<T>> result = elementStream.collect(toSet());
@@ -306,12 +307,20 @@ public class SimpleMatrix<T extends MatrixValue<T>> implements Matrix<T> {
     }
 
     @Override
-    public Matrix<T> additiveIdentity() {
-        return null;
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        SimpleMatrix<?> that = (SimpleMatrix<?>) o;
+        return rowDim == that.rowDim && colDim == that.colDim && Objects
+            .equal(elementTable, that.elementTable);
     }
 
     @Override
-    public Matrix<T> multiplicativeIdentity() {
-        return null;
+    public int hashCode() {
+        return Objects.hashCode(rowDim, colDim, elementTable);
     }
 }

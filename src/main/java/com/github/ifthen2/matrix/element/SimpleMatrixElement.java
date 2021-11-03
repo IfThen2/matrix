@@ -49,6 +49,7 @@ public class SimpleMatrixElement<T extends MatrixValue<T>> extends AbstractMatri
 
         return new SimpleMatrixElement<>(getRow(), getColumn(), newVal);
     }
+    
 
     @Override
     public String toString() {

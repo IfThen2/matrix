@@ -93,7 +93,7 @@ public interface Matrix<T extends MatrixValue<T>> extends MatrixValue<Matrix<T>>
      * @param secondRowIndex - second row number
      * @return new resultant Matrix
      */
-    Matrix<T> addRowToRow(int firstRowIndex, int secondRowIndex);
+    Matrix<T> addRowToRow(int firstRowIndex, int secondRowIndex, T scalar);
 
     /**
      * Scale one row of this Matrix by a scalar value, and return the result as a new Matrix.

@@ -28,16 +28,6 @@ public class MatrixBooleanValue implements MatrixValue<MatrixBooleanValue> {
     }
 
     @Override
-    public MatrixBooleanValue additiveIdentity() {
-        return new MatrixBooleanValue(false);
-    }
-
-    @Override
-    public MatrixBooleanValue multiplicativeIdentity() {
-        return new MatrixBooleanValue(true);
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;

@@ -46,7 +46,19 @@ public class SimpleMatrixVector<T extends MatrixValue<T>> implements MatrixVecto
 
     @Override
     public MatrixElement<T> getElement(int index) {
-        return null;
+
+        Stream<MatrixElement<T>> elementStream = elements.stream();
+
+        switch (orientation) {
+            case ROW:
+                elementStream = elementStream.filter(e -> e.getRow() == index);
+                break;
+            case COLUMN:
+                elementStream = elementStream.filter(e -> e.getColumn() == index);
+                break;
+        }
+
+        return elementStream.findFirst().orElse(null);
     }
 
     @Override

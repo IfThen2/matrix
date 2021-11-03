@@ -1,6 +1,7 @@
 package com.github.ifthen2.matrix.element;
 
 import com.github.ifthen2.matrix.value.MatrixValue;
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
 /**
@@ -36,5 +37,23 @@ public abstract class AbstractMatrixElement<T extends MatrixValue<T>> implements
     @Override
     public T getValue() {
         return value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        AbstractMatrixElement<?> that = (AbstractMatrixElement<?>) o;
+        return row == that.row && column == that.column && Objects
+            .equal(value, that.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(row, column, value);
     }
 }
